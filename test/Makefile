@@ -2,7 +2,7 @@
 
 containers = provision_docker_host_one provision_docker_host_two provision_docker_host_three provision_docker_host_four provision_docker_host_five optimus ironhide megatron starscream
 
-all: provision_docker unit
+all: unit provision_docker
 
 clean:
 	docker rm -f $(containers) || true

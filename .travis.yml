@@ -10,6 +10,7 @@ before_install:
 install:
   - pip install docker-py
   - pip install ansible
+  - pip install pytest
   - ansible --version
 
 script:
