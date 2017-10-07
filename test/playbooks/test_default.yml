@@ -4,6 +4,8 @@
   tasks:
     - name: "Invoke default docker provision"
       docker_provision:
+        private:
+          groups: ['my_group1', 'my_group2',]
 
 - name: Run tests for cloud iface
   hosts: robots
@@ -17,3 +19,14 @@
         line: "I am a self aware host and my name is {{ inventory_hostname }}."
 
     - include: "inc_verify_transformers.yml"
+
+- name: Check my_groups
+  hosts: localhost
+  tasks:
+    - name: Ensure transformers in groups
+      assert:
+        that:
+          - "item in groups['my_group1']"
+          - "item in groups['my_group2']"
+        msg: "Expected {{ item }} to be in {{ groups['my_group1'] }} or {{ groups['my_group2'] }}"
+      with_items: "{{ groups['robots'] }}"

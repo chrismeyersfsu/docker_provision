@@ -15,7 +15,7 @@ class ActionModule(ActionBase):
         task_vars = task_vars or dict()
 
         docker_container_module_args = self._task.args.copy()
-        host_vars = docker_container_module_args.get('private', {}).copy()
+        private = docker_container_module_args.get('private', {}).copy()
         if 'private' in docker_container_module_args:
             del docker_container_module_args['private']
 
@@ -29,7 +29,6 @@ class ActionModule(ActionBase):
             'tls': True,
             'stop_timeout': 1,
             'tty': True,
-            'expose': ['1-65535'],
         }
         host_vars_defaults = {
             'ansible_connection': 'docker',
@@ -43,10 +42,11 @@ class ActionModule(ActionBase):
                                            task_vars=task_vars))
         docker_container_facts = result.get('ansible_facts', {}).get('docker_container', dict())
 
+        host_vars = private.get('hostvars', dict())
         [host_vars.setdefault(k, v) for k, v in host_vars_defaults.iteritems()]
 
         result['add_host'] = dict(host_name=docker_container_module_args['name'], 
-                                  groups=task_vars.get('group_names', []), 
+                                  groups=task_vars.get('group_names', []) + private.get('groups', []), 
                                   host_vars=host_vars)
 
         result['changed'] = True

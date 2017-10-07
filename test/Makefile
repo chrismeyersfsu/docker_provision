@@ -8,8 +8,8 @@ clean:
 	docker rm -f $(containers) || true
 
 provision_docker: clean
-	ansible-playbook -i inventory playbooks/test_default.yml
+	ansible-playbook -i inventory playbooks/test_default.yml -vvv
 
 unit:
-	py.test unit/
+	py.test -s unit/ -vv
 
