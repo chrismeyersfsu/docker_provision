@@ -57,8 +57,28 @@ def test_run_defaults(docker_provision, task_vars_minimal, args_default):
                    'host_vars': {'ansible_connection': 'docker'}},
                    'changed': True}
 
-def test_run_private_groups(docker_provision, task_vars_minimal, args_default):
-    args_default['name'] = 'megatron'
+def test_run_private_overrides(docker_provision, task_vars_minimal):
+    args = {
+        'name': 'starscream',
+        'image': 'centos7',
+        'state': 'boo',
+        'restart': False,
+        'tls': False,
+        'stop_timeout': 11,
+        'tty': False,
+        'this_is_not_a_docker_container_param': 'foobar',
+    }
+    docker_provision._task.args = args.copy()
+    args_expected = args.copy()
+    args_expected['privileged'] = True
+
+    res = docker_provision.run(task_vars=task_vars_minimal)
+
+    docker_provision._execute_module.assert_called_with('docker_container',
+                                                        module_args=args_expected,
+                                                        task_vars=task_vars_minimal)
+
+def test_run_private_groups(docker_provision, task_vars_minimal):
     docker_provision._task.args['private'] = {
         'groups': ['g1', 'g2', 'g3'],
     }
@@ -67,8 +87,7 @@ def test_run_private_groups(docker_provision, task_vars_minimal, args_default):
 
     assert res['add_host']['groups'] == ['g1', 'g2', 'g3']
 
-def test_run_private_hostvars(docker_provision, task_vars_minimal, args_default):
-    args_default['name'] = 'megatron'
+def test_run_private_hostvars(docker_provision, task_vars_minimal):
     docker_provision._task.args['private'] = {
         'hostvars': {
             'foo': {
